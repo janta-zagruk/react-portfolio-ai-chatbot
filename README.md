@@ -1,56 +1,69 @@
-# React + TypeScript + Vite
+# Floating Chatbot Component for React
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A customizable floating chatbot UI component for React applications.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Installation
 
 ```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+npm install react-portfolio-ai-chatbot
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+# or
 
 ```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+yarn add react-portfolio-ai-chatbot
 ```
+
+```js
+import FloatingChatBot from "your-package-name";
+
+function App() {
+  return (
+    <FloatingChatBot
+      name={"Ian Hansson"}
+      theme={"dark"}
+      // Other optional props
+    />
+  );
+}
+
+export default App;
+```
+
+## Props
+<table>
+  <tr>
+    <th> Prop </th>
+    <th> Type </th>
+    <th> Description </th>
+    <th> Default </th>
+  </tr>
+  <tr>
+    <td> name </td>
+    <td> string </td>
+    <td> The name displayed in the chatbot header	 </td>
+    <td> Required </td>
+  </tr>
+  <tr>
+    <td> theme </td>
+    <td> 'light' | 'dark' </td>
+    <td> Color scheme of the chatbot </td>
+    <td> 'light' </td>
+  </tr>
+  <tr>
+    <td> position </td>
+    <td> 'left' | 'right' </td>
+    <td> Which side of screen to appear </td>
+    <td> 'right' </td>
+  </tr>
+  <tr>
+    <td> initialMessage </td>
+    <td> string </td>
+    <td> First message to display when opened </td>
+    <td> 'Hello! How can I help you today?' </td>
+  </tr>
+</table>
+
 ## License
+
 MIT © Md Sohail and Soumyadip Ghosh
