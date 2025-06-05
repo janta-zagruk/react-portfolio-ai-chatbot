@@ -52,3 +52,5 @@ export default tseslint.config({
   },
 })
 ```
+## License
+MIT © Md Sohail and Soumyadip Ghosh

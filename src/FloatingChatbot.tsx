@@ -3,10 +3,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Sparkles, X, Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import type { FloatingChatBotProps } from "./types";
 import { AIAssistantAPI } from "./api/ai-assistant/route";
-
-export function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
+export type FloatingChatBotProps = {
+  name: string;
+  theme: "light" | "dark";
+};
+function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -618,3 +620,4 @@ export function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
     </>
   );
 }
+export default FloatingChatBot;

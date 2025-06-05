@@ -1,5 +1,5 @@
 import "./App.css";
-import { FloatingChatBot } from "./FloatingChatbot";
+import FloatingChatBot  from "./FloatingChatbot";
 
 function App() {
   return (
