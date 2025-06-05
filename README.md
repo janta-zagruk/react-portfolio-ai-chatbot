@@ -15,7 +15,7 @@ yarn add react-portfolio-ai-chatbot
 ```
 
 ```js
-import FloatingChatBot from "your-package-name";
+import FloatingChatBot from "react-portfolio-ai-chatbot";
 
 function App() {
   return (
