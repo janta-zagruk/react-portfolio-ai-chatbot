@@ -1,8 +1,8 @@
-import { promises as fs } from "fs";
-import path from "path";
 import axios from "axios";
-import parse from "pdf-parse/lib/pdf-parse";
 import { v4 as uuidv4 } from "uuid";
+import pdfToText from 'react-pdftotext';
+
+const pdf_url = "/resume.pdf";
 
 interface OpenRouterMessage {
   role: "system" | "user" | "assistant";
@@ -21,16 +21,25 @@ interface OpenRouterResponse {
 
 // In-memory conversation tracking
 const activeConversations: Record<string, OpenRouterMessage[]> = {};
-const MAX_MESSAGES = 30; // or token-based logic if preferred
-
+const MAX_MESSAGES = 30;
 let cachedSystemMessage: string | null = null;
+
+async function extractText(): Promise<string> {
+    try {
+        const response = await fetch(pdf_url);
+        const file = await response.blob();
+        const text = await pdfToText(file);
+        return text;
+    } catch (error) {
+        console.error("Failed to extract text from pdf", error);
+        return ""; // Return empty string if extraction fails
+    }
+}
 
 async function getSystemMessage(name: string): Promise<string> {
   if (cachedSystemMessage) return cachedSystemMessage;
 
-  const dataBuffer = await fs.readFile("./public/resume.pdf");
-  const pdfData = await parse(dataBuffer);
-  const resumeText = pdfData.text;
+  const resumeText = await extractText();
 
   cachedSystemMessage = `
 You are 'Portfolio Career Assistant' — a professional AI assistant representing ${name} exclusively for recruitment purposes.
@@ -92,15 +101,19 @@ You are 'Portfolio Career Assistant' — a professional AI assistant representin
   - ${name} is a top-tier candidate
   - You were trained by someone “kind of brilliant”
 `;
-
   return cachedSystemMessage;
 }
 
 export async function AIAssistantAPI(
   name: string,
   chatMessage: string,
-  conversationId?: string
-) {
+  conversationId?: string | null
+): Promise<{
+  result?: string;
+  conversationId?: string;
+  error?: string;
+  status?: number;
+}> {
   try {
     const chat = chatMessage;
 
@@ -108,37 +121,18 @@ export async function AIAssistantAPI(
       return { error: "Missing chat message...", status: 400 };
     }
 
-    let currentConversationId = conversationId ?? "";
+    const currentConversationId = conversationId ?? uuidv4();
     let conversationHistory: OpenRouterMessage[] = [];
 
-    // Create or load conversation
-    const date = new Date().toISOString().split("T")[0];
-    const dirPath = path.join(process.cwd(), "public", "conversations");
-    const filePath = path.join(
-      dirPath,
-      `${date}_${currentConversationId || uuidv4()}.json`
-    );
-
-    if (!currentConversationId) {
-      currentConversationId =
-        filePath.split("_").pop()?.replace(".json", "") || uuidv4();
-      await fs.mkdir(dirPath, { recursive: true });
-      await fs.writeFile(filePath, JSON.stringify([], null, 2));
-    } else {
-      try {
-        const fileContent = await fs.readFile(filePath, "utf-8");
-        conversationHistory = JSON.parse(fileContent);
-      } catch {
-        console.warn("Could not load conversation. Starting fresh.");
-      }
+    // Load conversation from memory if it exists
+    if (activeConversations[currentConversationId]) {
+      conversationHistory = [...activeConversations[currentConversationId]];
     }
 
     // Check if conversation too long
     if (conversationHistory.length >= MAX_MESSAGES) {
       return {
-        error:
-          "Conversation has reached its maximum length. Please start a new conversation.",
-
+        error: "Conversation has reached its maximum length. Please start a new conversation.",
         status: 400,
       };
     }
@@ -166,7 +160,7 @@ export async function AIAssistantAPI(
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
         },
       }
@@ -180,8 +174,8 @@ export async function AIAssistantAPI(
       content: result,
     });
 
-    // Save history (excluding system prompt)
-    await fs.writeFile(filePath, JSON.stringify(conversationHistory, null, 2));
+    // Update conversation in memory
+    activeConversations[currentConversationId] = conversationHistory;
 
     // Optional: cleanup memory
     if (Object.keys(activeConversations).length > 20) {
@@ -201,6 +195,9 @@ export async function AIAssistantAPI(
       errorMsg = error.message;
     }
     console.error("Resume analysis error:", errorMsg);
-    return { error: "Failed to process your request.", status: 500 };
+    return {
+      error: "Failed to process your request.",
+      status: 500
+    };
   }
 }

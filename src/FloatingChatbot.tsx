@@ -12,7 +12,7 @@ export function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
     {
-      id: 1,
+      id: Date.now(),
       text: `👋 Hello! I'm ${name}'s AI assistant. I can help you assess how well their skills align with your job description and provide structured insights about ${name}'s qualifications.`,
       isUser: false,
     },
@@ -65,19 +65,12 @@ export function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
     setIsLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("chatMessage", inputValue);
-      if (conversationId) {
-        formData.append("conversationId", conversationId);
-      }
-
       const response = await AIAssistantAPI(name, inputValue, conversationId);
-
-      if (!response.ok) {
+      if (response.error) {
         throw new Error(`API request failed with status ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = response;
       if (!conversationId && data.conversationId) {
         setConversationId(data.conversationId);
       }
@@ -172,6 +165,9 @@ export function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
               zIndex: 1,
               transition: "transform 0.3s ease",
               transform: open ? "rotate(90deg)" : "rotate(0)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             {open ? (
@@ -337,17 +333,18 @@ export function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
                       : `1px solid ${colors.aiMessageBorder}`,
                     position: "relative",
                     wordBreak: "break-word",
+                    textAlign: "left",
                   }}
                 >
                   <ReactMarkdown
                     components={{
-                      p: ({ node, ...props }) => (
+                      p: (props) => (
                         <p
                           style={{ margin: "0 0 8px 0", color: colors.text }}
                           {...props}
                         />
                       ),
-                      ul: ({ node, ...props }) => (
+                      ul: (props) => (
                         <ul
                           style={{
                             margin: "4px 0",
@@ -358,7 +355,7 @@ export function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
                           {...props}
                         />
                       ),
-                      li: ({ node, ...props }) => (
+                      li: (props) => (
                         <li
                           style={{
                             marginBottom: "4px",
@@ -368,7 +365,7 @@ export function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
                           {...props}
                         />
                       ),
-                      strong: ({ node, ...props }) => (
+                      strong: (props) => (
                         <strong
                           style={{ fontWeight: 600, color: colors.text }}
                           {...props}
