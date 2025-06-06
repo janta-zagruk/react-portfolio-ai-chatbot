@@ -2,7 +2,6 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import pdfToText from 'react-pdftotext';
 
-const pdf_url = "/resume.pdf";
 
 interface OpenRouterMessage {
   role: "system" | "user" | "assistant";
@@ -24,7 +23,7 @@ const activeConversations: Record<string, OpenRouterMessage[]> = {};
 const MAX_MESSAGES = 30;
 let cachedSystemMessage: string | null = null;
 
-async function extractText(): Promise<string> {
+async function extractText(pdf_url: string): Promise<string> {
     try {
         const response = await fetch(pdf_url);
         const file = await response.blob();
@@ -36,10 +35,11 @@ async function extractText(): Promise<string> {
     }
 }
 
-async function getSystemMessage(name: string): Promise<string> {
+async function getSystemMessage(name: string, pdf: string): Promise<string> {
   if (cachedSystemMessage) return cachedSystemMessage;
 
-  const resumeText = await extractText();
+  const resumeText = await extractText(pdf);
+  console.log(resumeText);
 
   cachedSystemMessage = `
 You are 'Portfolio Career Assistant' — a professional AI assistant representing ${name} exclusively for recruitment purposes.
@@ -107,6 +107,8 @@ You are 'Portfolio Career Assistant' — a professional AI assistant representin
 export async function AIAssistantAPI(
   name: string,
   chatMessage: string,
+  pdf_url: string,
+  OPENROUTER_API_KEY: string,
   conversationId?: string | null
 ): Promise<{
   result?: string;
@@ -144,7 +146,7 @@ export async function AIAssistantAPI(
     activeConversations[currentConversationId] = [...conversationHistory];
 
     // Always prepend system message
-    const systemMessage = await getSystemMessage(name);
+    const systemMessage = await getSystemMessage(name, pdf_url);
     const fullMessages: OpenRouterMessage[] = [
       { role: "system", content: systemMessage },
       ...conversationHistory,
@@ -160,7 +162,7 @@ export async function AIAssistantAPI(
       },
       {
         headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
         },
       }

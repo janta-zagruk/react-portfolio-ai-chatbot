@@ -7,8 +7,10 @@ import { AIAssistantAPI } from "./api/ai-assistant/route";
 export type FloatingChatBotProps = {
   name: string;
   theme: "light" | "dark";
+  secret_key: string,
+  context_file : string
 };
-function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
+function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChatBotProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +23,8 @@ function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
   ]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const OPENROUTER_API_KEY = secret_key || import.meta.env.VITE_OPENROUTER_API_KEY;
+  const contextFilePath = context_file || '/resume.pdf';
 
   // Define theme-based colors
   const themeColors = {
@@ -67,7 +71,13 @@ function FloatingChatBot({ name, theme }: FloatingChatBotProps) {
     setIsLoading(true);
 
     try {
-      const response = await AIAssistantAPI(name, inputValue, conversationId);
+      const response = await AIAssistantAPI(
+        name,
+        inputValue,
+        contextFilePath,
+        OPENROUTER_API_KEY ,
+        conversationId,
+      );
       if (response.error) {
         throw new Error(`API request failed with status ${response.status}`);
       }
