@@ -6,14 +6,31 @@ import ReactMarkdown from "react-markdown";
 import { AIAssistantAPI } from "./api/ai-assistant/route";
 import { FloatingChatBotProps } from "./types";
 
-function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChatBotProps) {
-  const [open, setOpen] = useState(false);
+function FloatingChatBot({
+  name,
+  theme = "light",
+  secret_key,
+  context_file,
+  model,
+  chatbotName = "Career Assistant",
+  autoOpen = false,
+  initialGreeting,
+  inputPlaceHolderText,
+  customErrorMessage,
+  userTitle = "You",
+  botTitle = "Career Assistant",
+  onOpen,
+  onClose,
+}: FloatingChatBotProps) {
+  const [open, setOpen] = useState(autoOpen);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: Date.now(),
-      text: `👋 Hello! I'm ${name}'s AI assistant. I can help you assess how well their skills align with your job description and provide structured insights about ${name}'s qualifications.`,
+      text: initialGreeting
+        ? initialGreeting
+        : `👋 Hello! I'm ${name}'s AI assistant. I can help you assess how well their skills align with your job description and provide structured insights about ${name}'s qualifications.`,
       isUser: false,
     },
   ]);
@@ -21,7 +38,6 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
   const [conversationId, setConversationId] = useState<string | null>(null);
   const OPENROUTER_API_KEY = secret_key;
   const contextFilePath = context_file;
-  
 
   // Define theme-based colors
   const themeColors = {
@@ -72,11 +88,13 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
         name,
         inputValue,
         contextFilePath,
-        OPENROUTER_API_KEY ,
-        conversationId,
+        OPENROUTER_API_KEY,
+        model,
+        conversationId
       );
       if (response.error) {
-        throw new Error(`API request failed with status ${response.status}`);
+        throw new Error(`${response.error}
+          API request failed with status: ${response.status}`);
       }
 
       const data = response;
@@ -88,10 +106,9 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
         text: data.result || "Sorry, I couldn't process that.",
         isUser: false,
       };
-
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
-      console.error("Error calling API:", error);
+      console.error(customErrorMessage ? customErrorMessage : error);
       setMessages((prev) => [
         ...prev,
         {
@@ -103,6 +120,18 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const toggleOpen = () => {
+    setOpen((prev) => {
+      const newState = !prev;
+      if (newState && typeof onOpen === "function") {
+        onOpen();
+      } else if (!newState && typeof onClose === "function") {
+        onClose();
+      }
+      return newState;
+    });
   };
 
   const scrollToBottom = () => {
@@ -125,7 +154,7 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
         }}
       >
         <button
-          onClick={() => setOpen(!open)}
+          onClick={() => toggleOpen()}
           style={{
             width: "64px",
             height: "64px",
@@ -282,7 +311,7 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
             </div>
             <div>
               <div style={{ fontSize: "16px", fontWeight: 600 }}>
-                Career Assistant
+                {chatbotName}
               </div>
               <div
                 style={{
@@ -328,6 +357,22 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
                   animation: "fadeIn 0.3s ease-out",
                 }}
               >
+                {((message.isUser && userTitle) ||
+                  (!message.isUser && botTitle)) && (
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      marginBottom: "4px",
+                      color: colors.textSecondary,
+                      textAlign: message.isUser ? "right" : "left",
+                      paddingLeft: message.isUser ? "0" : "8px",
+                      paddingRight: message.isUser ? "8px" : "0",
+                    }}
+                  >
+                    {message.isUser ? userTitle : botTitle}
+                  </div>
+                )}
                 <div
                   style={{
                     backgroundColor: message.isUser
@@ -474,7 +519,9 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder={
-                    "Ask me anything or give me your job description..."
+                    inputPlaceHolderText
+                      ? inputPlaceHolderText
+                      : "Ask me anything or give me your job description..."
                   }
                   disabled={isLoading}
                   style={{
@@ -504,7 +551,7 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
                 />
                 {inputValue.trim() ? (
                   <button
-                    type={inputValue.trim() ? "submit" : "button"}
+                    type="submit"
                     disabled={isLoading}
                     style={{
                       backgroundColor: inputValue.trim()
@@ -513,9 +560,9 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
                         ? "rgba(0,0,0,0.1)"
                         : "rgba(255,255,255,0.1)",
                       color: "white",
-                      width: "48px",
-                      height: "48px",
-                      borderRadius: "14px",
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "10px",
                       border: "none",
                       cursor: isLoading ? "not-allowed" : "pointer",
                       display: "flex",
@@ -523,6 +570,7 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
                       justifyContent: "center",
                       transition: "all 0.3s ease",
                       opacity: isLoading ? 0.7 : 1,
+                      padding: "12px", // Ensures internal spacing
                     }}
                     onMouseEnter={(e) => {
                       if (inputValue.trim() && !isLoading) {
@@ -545,7 +593,7 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
                       }
                     }}
                   >
-                    <Send size={20} strokeWidth={2} />
+                    <Send size={16} strokeWidth={2.2} />
                   </button>
                 ) : null}
               </div>

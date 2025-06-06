@@ -1,7 +1,6 @@
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-import pdfToText from 'react-pdftotext';
-
+import pdfToText from "react-pdftotext";
 
 interface OpenRouterMessage {
   role: "system" | "user" | "assistant";
@@ -24,15 +23,15 @@ const MAX_MESSAGES = 30;
 let cachedSystemMessage: string | null = null;
 
 async function extractText(pdf_url: string): Promise<string> {
-    try {
-        const response = await fetch(pdf_url);
-        const file = await response.blob();
-        const text = await pdfToText(file);
-        return text;
-    } catch (error) {
-        console.error("Failed to extract text from pdf", error);
-        return ""; // Return empty string if extraction fails
-    }
+  try {
+    const response = await fetch(pdf_url);
+    const file = await response.blob();
+    const text = await pdfToText(file);
+    return text;
+  } catch (error) {
+    console.error("Failed to extract text from pdf", error);
+    return ""; // Return empty string if extraction fails
+  }
 }
 
 async function getSystemMessage(name: string, pdf: string): Promise<string> {
@@ -109,6 +108,7 @@ export async function AIAssistantAPI(
   chatMessage: string,
   pdf_url: string,
   OPENROUTER_API_KEY: string,
+  model: string,
   conversationId?: string | null
 ): Promise<{
   result?: string;
@@ -117,13 +117,12 @@ export async function AIAssistantAPI(
   status?: number;
 }> {
   try {
-    
     const chat = chatMessage;
 
     if (!chat) {
       return { error: "Missing chat message...", status: 400 };
     }
-    if(!OPENROUTER_API_KEY) {
+    if (!OPENROUTER_API_KEY) {
       return { error: "Missing OPENROUTER_API_KEY...", status: 400 };
     }
 
@@ -138,7 +137,8 @@ export async function AIAssistantAPI(
     // Check if conversation too long
     if (conversationHistory.length >= MAX_MESSAGES) {
       return {
-        error: "Conversation has reached its maximum length. Please start a new conversation.",
+        error:
+          "Conversation has reached its maximum length. Please start a new conversation.",
         status: 400,
       };
     }
@@ -160,7 +160,7 @@ export async function AIAssistantAPI(
     const response: OpenRouterResponse = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "google/gemini-flash-1.5-8b",
+        model: model,
         messages: fullMessages,
         temperature: 0.1,
       },
@@ -202,8 +202,8 @@ export async function AIAssistantAPI(
     }
     console.error("Resume analysis error:", errorMsg);
     return {
-      error: "Failed to process your request.",
-      status: 500
+      error: errorMsg,
+      status: 500,
     };
   }
 }
