@@ -14,15 +14,21 @@ npm install react-portfolio-ai-chatbot
 yarn add react-portfolio-ai-chatbot
 ```
 
+## Usage in React (Vite/CRA)
+
 ```js
 import FloatingChatBot from "react-portfolio-ai-chatbot";
+import resumePdf from "/resume.pdf";
 
 function App() {
   return (
     <FloatingChatBot
-      name={"Ian Hansson"}
-      theme={"dark"}
-      // Other optional props
+      name="Ian Hansson"
+      secret_key={import.meta.env.VITE_OPENROUTER_API_KEY}
+      context_file={resumePdf}
+      model="google/gemini-flash-1.5-8b"
+      chatbotName="Career Assistant"
+      initialGreeting="Hello! I'm Ian's AI assistant. I can help you assess how well their skills align with your job description and provide structured insights about Ian's qualifications."
     />
   );
 }
@@ -30,38 +36,197 @@ function App() {
 export default App;
 ```
 
+## Usage in React (Vite/CRA)
+
+To avoid SSR issues, use next/dynamic to dynamically import the chatbot component with SSR disabled:
+
+```js
+// pages/index.tsx or any client-side page
+import dynamic from "next/dynamic";
+import resumePdf from "../public/resume.pdf"; // or your resume file path
+
+const FloatingChatBot = dynamic(() => import("react-portfolio-ai-chatbot"), {
+  ssr: false,
+});
+
+export default function Home() {
+  return (
+    <FloatingChatBot
+      name="Ian Hansson"
+      secret_key={process.env.NEXT_PUBLIC_OPENROUTER_API_KEY!}
+      context_file={resumePdf}
+      model="google/gemini-flash-1.5-8b"
+      chatbotName="Career Assistant"
+      initialGreeting="Hi! I'm Ian's AI assistant. Ask me anything about their resume!"
+      position="right"
+      theme="light"
+      autoOpen={false}
+    />
+  );
+}
+```
+
 ## Props
+
 <table>
-  <tr>
-    <th> Prop </th>
-    <th> Type </th>
-    <th> Description </th>
-    <th> Default </th>
-  </tr>
-  <tr>
-    <td> name </td>
-    <td> string </td>
-    <td> The name displayed in the chatbot header	 </td>
-    <td> Required </td>
-  </tr>
-  <tr>
-    <td> theme </td>
-    <td> 'light' | 'dark' </td>
-    <td> Color scheme of the chatbot </td>
-    <td> 'light' </td>
-  </tr>
-  <tr>
-    <td> position </td>
-    <td> 'left' | 'right' </td>
-    <td> Which side of screen to appear </td>
-    <td> 'right' </td>
-  </tr>
-  <tr>
-    <td> initialMessage </td>
-    <td> string </td>
-    <td> First message to display when opened </td>
-    <td> 'Hello! How can I help you today?' </td>
-  </tr>
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+      <th>Required</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>name</code></td>
+      <td><code>string</code></td>
+      <td>Name of the user</td>
+      <td>–</td>
+      <td><strong>Yes</strong></td>
+    </tr>
+    <tr>
+      <td><code>theme</code></td>
+      <td><code>"light" | "dark"</code></td>
+      <td>Color scheme of the chatbot</td>
+      <td><code>"light"</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>secret_key</code></td>
+      <td><code>string</code></td>
+      <td>OpenRouter API key</td>
+      <td>–</td>
+      <td><strong>Yes</strong></td>
+    </tr>
+    <tr>
+      <td><code>context_file</code></td>
+      <td><code>string</code></td>
+      <td>Path to the resume or context file (PDF)</td>
+      <td>–</td>
+      <td><strong>Yes</strong></td>
+    </tr>
+    <tr>
+      <td><code>model</code></td>
+      <td><code>string</code></td>
+      <td>Model name to use from OpenRouter</td>
+      <td>–</td>
+      <td><strong>Yes</strong></td>
+    </tr>
+    <tr>
+      <td><code>chatbotName</code></td>
+      <td><code>string</code></td>
+      <td>Custom name for the chatbot</td>
+      <td><code>"Career Assistant"</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>autoOpen</code></td>
+      <td><code>boolean</code></td>
+      <td>Whether the chat opens automatically on page load</td>
+      <td><code>false</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>initialGreeting</code></td>
+      <td><code>string</code></td>
+      <td>First message displayed when opened</td>
+      <td><code>`👋 Hello! I'm ${name}'s AI assistant. I can help you assess how well their skills align with your job description and provide structured insights about ${name}'s qualifications.`</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>inputPlaceHolderText</code></td>
+      <td><code>string</code></td>
+      <td>Placeholder for the user input field</td>
+      <td><code>"Ask me anything or give me your job description..."</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>customErrorMessage</code></td>
+      <td><code>string</code></td>
+      <td>Custom message shown when the API call fails</td>
+      <td><code>API error message (default)</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>userTitle</code></td>
+      <td><code>string</code></td>
+      <td>Label used for user messages</td>
+      <td><code>"You"</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>botTitle</code></td>
+      <td><code>string</code></td>
+      <td>Label used for bot messages</td>
+      <td><code>"Career Assistant"</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>position</code></td>
+      <td><code>"left" | "right"</code></td>
+      <td>Side of screen the chatbot appears on</td>
+      <td><code>"right"</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>chatWindowWidth</code></td>
+      <td><code>string</code></td>
+      <td>Width of the chat window</td>
+      <td><code>"380px"</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>chatWindowMaxHeight</code></td>
+      <td><code>string</code></td>
+      <td>Max height of the chat window</td>
+      <td><code>"70vh"</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>chatMessageFontSize</code></td>
+      <td><code>string</code></td>
+      <td>Font size used for messages</td>
+      <td><code>"14px"</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>chatMessageFontFamily</code></td>
+      <td><code>string</code></td>
+      <td>Font family for messages</td>
+      <td><code>"inherit"</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>sendButtonColor</code></td>
+      <td><code>string</code></td>
+      <td>CSS color for send button</td>
+      <td><code>"#6366f1"</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>toggleButtonColor</code></td>
+      <td><code>string</code></td>
+      <td>CSS color for toggle button and assistant logo background</td>
+      <td><code>"linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef)"</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>onOpen</code></td>
+      <td><code>() => void</code></td>
+      <td>Callback when chatbot is opened</td>
+      <td><code>undefined</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>onClose</code></td>
+      <td><code>() => void</code></td>
+      <td>Callback when chatbot is closed</td>
+      <td><code>undefined</code></td>
+      <td>No</td>
+    </tr>
+  </tbody>
 </table>
 
 ## License

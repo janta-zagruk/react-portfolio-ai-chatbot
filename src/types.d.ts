@@ -1,8 +1,8 @@
 export type FloatingChatBotProps = {
   name: string;
   theme?: "light" | "dark";
-  secret_key: string,
-  context_file : string,
+  secret_key: string;
+  context_file: string;
   model: string;
   chatbotName?: string;
   autoOpen?: boolean;
@@ -11,6 +11,13 @@ export type FloatingChatBotProps = {
   customErrorMessage?: string;
   userTitle?: string;
   botTitle?: string;
+  position?: "left" | "right";
+  chatWindowWidth?: string;
+  chatWindowMaxHeight?: string;
+  chatMessageFontSize?: string;
+  chatMessageFontFamily?: string;
+  sendButtonColor?: string;
+  toggleButtonColor?: string;
   onOpen?: () => void;
   onClose?: () => void;
 };

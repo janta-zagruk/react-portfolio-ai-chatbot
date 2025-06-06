@@ -19,6 +19,13 @@ function FloatingChatBot({
   customErrorMessage,
   userTitle = "You",
   botTitle = "Career Assistant",
+  position = "right",
+  chatWindowWidth = "380px",
+  chatWindowMaxHeight = "70vh",
+  chatMessageFontSize = "14px",
+  chatMessageFontFamily = "inherit",
+  sendButtonColor = "#6366f1",
+  toggleButtonColor = "linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef)",
   onOpen,
   onClose,
 }: FloatingChatBotProps) {
@@ -142,6 +149,18 @@ function FloatingChatBot({
     scrollToBottom();
   }, [messages]);
 
+  // Helper function to darken a hex color
+  const darkenColor = (color: string, percent: number) => {
+    if (!color.startsWith("#")) return color; // Skip if not hex
+
+    const num = parseInt(color.replace("#", ""), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.max(0, (num >> 16) - amt);
+    const G = Math.max(0, ((num >> 8) & 0x00ff) - amt);
+    const B = Math.max(0, (num & 0x0000ff) - amt);
+    return `#${((1 << 24) | (R << 16) | (G << 8) | B).toString(16).slice(1)}`;
+  };
+
   return (
     <>
       {/* Floating Button */}
@@ -149,7 +168,7 @@ function FloatingChatBot({
         style={{
           position: "fixed",
           bottom: "20px",
-          right: "20px",
+          [position === "left" ? "left" : "right"]: "20px",
           zIndex: 1000,
         }}
       >
@@ -159,7 +178,7 @@ function FloatingChatBot({
             width: "64px",
             height: "64px",
             borderRadius: "9999px",
-            background: "linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef)",
+            background: toggleButtonColor,
             boxShadow:
               theme === "light"
                 ? "0 10px 25px rgba(99, 102, 241, 0.3)"
@@ -190,8 +209,7 @@ function FloatingChatBot({
             style={{
               position: "absolute",
               inset: 0,
-              background:
-                "linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3))",
+              background: toggleButtonColor,
               borderRadius: "9999px",
               filter: "blur(8px)",
               animation:
@@ -265,9 +283,9 @@ function FloatingChatBot({
           style={{
             position: "fixed",
             bottom: "100px",
-            right: "20px",
-            width: "380px",
-            maxHeight: "70vh",
+            [position === "right" ? "right" : "left"]: "20px", // Dynamic positioning
+            width: chatWindowWidth,
+            maxHeight: chatWindowMaxHeight,
             backgroundColor: colors.background,
             backdropFilter: "blur(16px)",
             border: `1px solid ${colors.border}`,
@@ -298,7 +316,7 @@ function FloatingChatBot({
           >
             <div
               style={{
-                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                background: toggleButtonColor,
                 width: "36px",
                 height: "36px",
                 borderRadius: "12px",
@@ -388,13 +406,20 @@ function FloatingChatBot({
                     position: "relative",
                     wordBreak: "break-word",
                     textAlign: "left",
+                    fontSize: chatMessageFontSize,
+                    fontFamily: chatMessageFontFamily,
                   }}
                 >
                   <ReactMarkdown
                     components={{
                       p: (props) => (
                         <p
-                          style={{ margin: "0 0 8px 0", color: colors.text }}
+                          style={{
+                            margin: "0 0 8px 0",
+                            color: colors.text,
+                            fontSize: chatMessageFontSize,
+                            fontFamily: chatMessageFontFamily,
+                          }}
                           {...props}
                         />
                       ),
@@ -405,6 +430,8 @@ function FloatingChatBot({
                             paddingLeft: "20px",
                             listStyleType: "disc",
                             color: colors.text,
+                            fontSize: chatMessageFontSize,
+                            fontFamily: chatMessageFontFamily,
                           }}
                           {...props}
                         />
@@ -415,13 +442,20 @@ function FloatingChatBot({
                             marginBottom: "4px",
                             lineHeight: "1.4",
                             color: colors.text,
+                            fontSize: chatMessageFontSize,
+                            fontFamily: chatMessageFontFamily,
                           }}
                           {...props}
                         />
                       ),
                       strong: (props) => (
                         <strong
-                          style={{ fontWeight: 600, color: colors.text }}
+                          style={{
+                            fontWeight: 600,
+                            color: colors.text,
+                            fontSize: chatMessageFontSize,
+                            fontFamily: chatMessageFontFamily,
+                          }}
                           {...props}
                         />
                       ),
@@ -555,7 +589,7 @@ function FloatingChatBot({
                     disabled={isLoading}
                     style={{
                       backgroundColor: inputValue.trim()
-                        ? "#6366f1"
+                        ? sendButtonColor
                         : theme === "light"
                         ? "rgba(0,0,0,0.1)"
                         : "rgba(255,255,255,0.1)",
@@ -574,7 +608,10 @@ function FloatingChatBot({
                     }}
                     onMouseEnter={(e) => {
                       if (inputValue.trim() && !isLoading) {
-                        e.currentTarget.style.backgroundColor = "#4f46e5";
+                        e.currentTarget.style.backgroundColor = darkenColor(
+                          sendButtonColor,
+                          20
+                        ); // Darken by 20% on hover
                       } else if (!isLoading) {
                         e.currentTarget.style.backgroundColor =
                           theme === "light"
@@ -584,7 +621,7 @@ function FloatingChatBot({
                     }}
                     onMouseLeave={(e) => {
                       if (inputValue.trim() && !isLoading) {
-                        e.currentTarget.style.backgroundColor = "#6366f1";
+                        e.currentTarget.style.backgroundColor = sendButtonColor; // Reset to original
                       } else if (!isLoading) {
                         e.currentTarget.style.backgroundColor =
                           theme === "light"
