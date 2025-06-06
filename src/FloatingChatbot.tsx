@@ -4,12 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { Sparkles, X, Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { AIAssistantAPI } from "./api/ai-assistant/route";
-export type FloatingChatBotProps = {
-  name: string;
-  theme: "light" | "dark";
-  secret_key: string,
-  context_file : string
-};
+import { FloatingChatBotProps } from "./types";
+
 function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChatBotProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
