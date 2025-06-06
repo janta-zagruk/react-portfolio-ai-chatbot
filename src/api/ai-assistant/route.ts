@@ -117,10 +117,14 @@ export async function AIAssistantAPI(
   status?: number;
 }> {
   try {
+    
     const chat = chatMessage;
 
     if (!chat) {
       return { error: "Missing chat message...", status: 400 };
+    }
+    if(!OPENROUTER_API_KEY) {
+      return { error: "Missing OPENROUTER_API_KEY...", status: 400 };
     }
 
     const currentConversationId = conversationId ?? uuidv4();

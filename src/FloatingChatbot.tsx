@@ -23,8 +23,9 @@ function FloatingChatBot({ name, theme, secret_key, context_file }: FloatingChat
   ]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const OPENROUTER_API_KEY = secret_key || import.meta.env.VITE_OPENROUTER_API_KEY;
-  const contextFilePath = context_file || '/resume.pdf';
+  const OPENROUTER_API_KEY = secret_key;
+  const contextFilePath = context_file;
+  
 
   // Define theme-based colors
   const themeColors = {
