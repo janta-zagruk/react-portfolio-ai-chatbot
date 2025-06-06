@@ -36,7 +36,7 @@ function App() {
 export default App;
 ```
 
-## Usage in React (Vite/CRA)
+## Usage in Next.js (with Dynamic Import)
 
 To avoid SSR issues, use next/dynamic to dynamically import the chatbot component with SSR disabled:
 
@@ -87,13 +87,6 @@ export default function Home() {
       <td><strong>Yes</strong></td>
     </tr>
     <tr>
-      <td><code>theme</code></td>
-      <td><code>"light" | "dark"</code></td>
-      <td>Color scheme of the chatbot</td>
-      <td><code>"light"</code></td>
-      <td>No</td>
-    </tr>
-    <tr>
       <td><code>secret_key</code></td>
       <td><code>string</code></td>
       <td>OpenRouter API key</td>
@@ -113,6 +106,13 @@ export default function Home() {
       <td>Model name to use from OpenRouter</td>
       <td>–</td>
       <td><strong>Yes</strong></td>
+    </tr>
+    <tr>
+      <td><code>theme</code></td>
+      <td><code>"light" | "dark"</code></td>
+      <td>Color scheme of the chatbot</td>
+      <td><code>"light"</code></td>
+      <td>No</td>
     </tr>
     <tr>
       <td><code>chatbotName</code></td>
