@@ -1,40 +1,45 @@
 # Floating Chatbot Component for React
 
-A customizable floating chatbot UI component for React applications.
+A **customizable floating chatbot UI component** for React portfolio websites.
+
+## 🚀 The Story Behind This
+
+As developers, we wanted to add an AI assistant to our portfolio websites — something lightweight, clean, and useful for recruiters. So we built this chatbot that reads our resume PDF and interacts using powerful models via OpenRouter. We packaged it into `react-portfolio-ai-chatbot` to make it easy for others to plug into their own portfolios too. More updates and enhancements will follow!
+
+## 🎯 Perfect For
+
+- **Developer portfolios**
+- **Interactive resumes**
+- **Personal sites looking to showcase experience smartly**
+
+---
 
 ## Installation
 
-```js
+````bash
 npm install react-portfolio-ai-chatbot
-```
-
 # or
-
-```js
 yarn add react-portfolio-ai-chatbot
-```
 
 ## Usage in React (Vite/CRA)
 
 ```js
 import FloatingChatBot from "react-portfolio-ai-chatbot";
-import resumePdf from "/resume.pdf";
 
 function App() {
   return (
     <FloatingChatBot
       name="Ian Hansson"
       secret_key={import.meta.env.VITE_OPENROUTER_API_KEY}
-      context_file={resumePdf}
+      context_file={"/resume.pdf"}
       model="google/gemini-flash-1.5-8b"
       chatbotName="Career Assistant"
       initialGreeting="Hello! I'm Ian's AI assistant. I can help you assess how well their skills align with your job description and provide structured insights about Ian's qualifications."
     />
   );
 }
-
 export default App;
-```
+````
 
 ## Usage in Next.js (with Dynamic Import)
 
@@ -42,8 +47,8 @@ To avoid SSR issues, use next/dynamic to dynamically import the chatbot componen
 
 ```js
 // pages/index.tsx or any client-side page
+'use client'
 import dynamic from "next/dynamic";
-import resumePdf from "../public/resume.pdf"; // or your resume file path
 
 const FloatingChatBot = dynamic(() => import("react-portfolio-ai-chatbot"), {
   ssr: false,
@@ -54,7 +59,7 @@ export default function Home() {
     <FloatingChatBot
       name="Ian Hansson"
       secret_key={process.env.NEXT_PUBLIC_OPENROUTER_API_KEY!}
-      context_file={resumePdf}
+      context_file={"/resume.pdf"}
       model="google/gemini-flash-1.5-8b"
       chatbotName="Career Assistant"
       initialGreeting="Hi! I'm Ian's AI assistant. Ask me anything about their resume!"
@@ -228,6 +233,17 @@ export default function Home() {
     </tr>
   </tbody>
 </table>
+
+## How to Get an OpenRouter API Key
+
+1. Visit https://openrouter.ai
+2. Sign up with your email or GitHub
+3. Go to API Keys from your dashboard
+4. Create a new API key and use it in the <code>secret_key</code> prop
+
+## Credits & Legal
+
+This chatbot uses the OpenRouter API to power AI interactions. All responses are generated via OpenRouter's supported models. Thanks to [OpenRouter](https://openrouter.ai/) for providing powerful, accessible AI APIs.
 
 ## License
 
