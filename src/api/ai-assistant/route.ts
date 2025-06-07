@@ -109,6 +109,8 @@ export async function AIAssistantAPI(
   pdf_url: string,
   OPENROUTER_API_KEY: string,
   model: string,
+  endpointUrl: string,
+  token?: string,
   conversationId?: string | null
 ): Promise<{
   result?: string;
@@ -156,9 +158,9 @@ export async function AIAssistantAPI(
       ...conversationHistory,
     ];
 
-    // Call OpenRouter API
+    // Call Backend API
     const response: OpenRouterResponse = await axios.post(
-      "https://openrouter.ai/api/v1/chat/completions",
+      endpointUrl,
       {
         model: model,
         messages: fullMessages,
@@ -166,7 +168,7 @@ export async function AIAssistantAPI(
       },
       {
         headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          ...(token && { Authorization: `Bearer ${token}` }),
           "Content-Type": "application/json",
         },
       }

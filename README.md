@@ -19,7 +19,9 @@ As developers, we wanted to add an AI assistant to our portfolio websites — so
 ```bash
 npm install react-portfolio-ai-chatbot
 ```
+
 # or
+
 ```bash
 yarn add react-portfolio-ai-chatbot
 ```
@@ -42,7 +44,7 @@ function App() {
   );
 }
 export default App;
-````
+```
 
 ## Usage in Next.js (with Dynamic Import)
 
@@ -72,6 +74,121 @@ export default function Home() {
     />
   );
 }
+```
+
+## Setting Up a Backend Proxy
+
+To securely use your OpenRouter API key, we recommend setting up a lightweight backend server that acts as a proxy between your chatbot and the OpenRouter API. This keeps your key safe from exposure in the frontend.
+
+**1. Install Required Packages**
+
+Set up a basic Express server:
+
+```bash
+npm install express cors dotenv axios
+```
+
+**2. Create an <code>.env</code> File**
+
+Set up a basic Express server:
+
+```bash
+OPENROUTER_API_KEY=sk-xxxxxxx
+PORT=3001
+```
+
+**3. Create a Backend File (<code>server.js</code>)**
+
+Here’s an example route that handles POST requests to OpenRouter’s chat completion endpoint:
+
+```js
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const axios = require("axios");
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Chat route
+app.post("/api/chat", async (req, res) => {
+  try {
+    const { messages, model, temperature } = req.body;
+
+    const response = await axios.post(
+      "https://openrouter.ai/api/v1/chat/completions",
+      { model, messages, temperature },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "HTTP-Referer": "https://your-portfolio-domain.com", // Optional
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Failed to connect to OpenRouter" });
+  }
+});
+
+app.listen(process.env.PORT || 3001, () =>
+  console.log("Server running on http://localhost:3001")
+);
+```
+
+**4. Use the Proxy Endpoint in Your Frontend**
+
+In your React or Next.js app, use the endpointUrl prop instead of passing the secret_key directly:
+
+```js
+<FloatingChatBot
+  name="Ian Hansson"
+  endpointUrl="http://localhost:3001/api/chat"
+  context_file="/resume.pdf"
+  model="google/gemini-flash-1.5-8b"
+  chatbotName="Career Assistant"
+/>
+```
+
+**5. (Optional) Add Authentication**
+
+You can protect your backend route using a bearer token.
+
+**In the frontend**, pass the token:
+
+```js
+<FloatingChatBot
+  name="Ian Hansson"
+  endpointUrl="http://localhost:3001/api/chat"
+  bearerToken="your_token"
+  context_file="/resume.pdf"
+  model="google/gemini-flash-1.5-8b"
+/>
+```
+
+**In the backend**, verify it:
+
+```js
+app.post("/api/chat", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (token !== process.env.EXPECTED_TOKEN) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  // ...the rest of your code here
+});
+```
+
+Add this to your <code>.env</code>
+
+```bash
+EXPECTED_TOKEN=your_token
 ```
 
 ## Props
@@ -114,6 +231,20 @@ export default function Home() {
       <td>Model name to use from OpenRouter</td>
       <td>–</td>
       <td><strong>Yes</strong></td>
+    </tr>
+    <tr>
+      <td><code>endpointUrl</code></td>
+      <td><code>string</code></td>
+      <td>Backend server endpoint that proxies requests to the OpenRouter API</td>
+      <td>–</td>
+      <td><strong>Yes</strong></td>
+    </tr>
+    <tr>
+      <td><code>bearerToken</code></td>
+      <td><code>string</code></td>
+      <td>Optional bearer token for authorizing requests to the backend API</td>
+      <td>–</td>
+      <td>No</td>
     </tr>
     <tr>
       <td><code>theme</code></td>

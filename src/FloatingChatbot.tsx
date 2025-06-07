@@ -12,6 +12,8 @@ function FloatingChatBot({
   secret_key,
   context_file,
   model,
+  endpointUrl,
+  bearerToken="",
   chatbotName = "Career Assistant",
   autoOpen = false,
   initialGreeting,
@@ -97,6 +99,8 @@ function FloatingChatBot({
         contextFilePath,
         OPENROUTER_API_KEY,
         model,
+        endpointUrl,
+        bearerToken,
         conversationId
       );
       if (response.error) {

@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 .env
+public/resume.pdf
 
 *.tgz
 
