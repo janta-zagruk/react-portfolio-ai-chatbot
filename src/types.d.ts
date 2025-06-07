@@ -1,9 +1,11 @@
 export type FloatingChatBotProps = {
   name: string;
-  theme?: "light" | "dark";
   secret_key: string;
   context_file: string;
   model: string;
+  endpointUrl: string;
+  bearerToken?: string;
+  theme?: "light" | "dark";
   chatbotName?: string;
   autoOpen?: boolean;
   initialGreeting?: string;

@@ -16,6 +16,7 @@ function App() {
         theme={"light"}
         secret_key={import.meta.env.VITE_OPENROUTER_API_KEY}
         context_file={resumePdf}
+        endpointUrl={"https://api.openrouter.ai"}
         model={"google/gemini-flash-1.5-8b"}
         chatbotName={"Career Assistant"}
         autoOpen={false}
@@ -24,7 +25,6 @@ function App() {
         customErrorMessage={"Sorry, I couldn't process that."}
         position="right"
         chatWindowMaxHeight={"70vh"}
-        chatWindowWidth={"70vh"}
         onOpen={() => handleOpen()}
         onClose={() => handleClose()}
         chatMessageFontSize="12px"
