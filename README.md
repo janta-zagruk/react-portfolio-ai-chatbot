@@ -16,10 +16,13 @@ As developers, we wanted to add an AI assistant to our portfolio websites — so
 
 ## Installation
 
-````bash
+```bash
 npm install react-portfolio-ai-chatbot
+```
 # or
+```bash
 yarn add react-portfolio-ai-chatbot
+```
 
 ## Usage in React (Vite/CRA)
 
