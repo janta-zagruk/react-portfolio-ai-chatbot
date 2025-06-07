@@ -1,6 +1,9 @@
 {
   "name": "react-portfolio-ai-chatbot",
   "version": "0.7.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "A floating chatbot component for React applications",
   "keywords": ["react", "chatbot", "ai", "react-portfolio-ai-chatbot", "openrouter"],
   "main": "./dist/index.cjs.js",

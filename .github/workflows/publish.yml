@@ -3,13 +3,16 @@ name: Publish to NPM
 on:
   push:
     branches:
-      - master 
+      - master
+  # Optional: Only publish on version tags
+  # push:
+  #   tags:
+  #     - 'v*'
 
 jobs:
   publish:
     name: Publish package
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,8 +22,6 @@ jobs:
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org/'
-          always-auth: true
-          token: ${{ secrets.NPM_TOKEN }}
 
       - name: Install dependencies
         run: npm ci
@@ -28,7 +29,22 @@ jobs:
       - name: Build package
         run: npm run build
 
+      - name: Check if version exists
+        id: check-version
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+            echo "Version $PACKAGE_VERSION already exists"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $PACKAGE_VERSION does not exist, proceeding with publish"
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish to NPM
-        run: npm publish
+        if: steps.check-version.outputs.skip == 'false'
+        run: npm publish --access public
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
