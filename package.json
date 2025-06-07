@@ -1,5 +1,5 @@
 {
-  "name": "react-portfolio-ai-chatbot-4",
+  "name": "react-portfolio-ai-chatbot",
   "version": "0.4.0",
   "description": "A floating chatbot component for React applications",
   "main": "./dist/index.cjs.js",

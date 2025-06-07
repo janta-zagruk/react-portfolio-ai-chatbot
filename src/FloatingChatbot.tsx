@@ -9,7 +9,6 @@ import { FloatingChatBotProps } from "./types";
 function FloatingChatBot({
   name,
   theme = "light",
-  secret_key,
   context_file,
   model,
   endpointUrl,
@@ -45,7 +44,7 @@ function FloatingChatBot({
   ]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const OPENROUTER_API_KEY = secret_key;
+
   const contextFilePath = context_file;
 
   // Define theme-based colors
@@ -97,7 +96,6 @@ function FloatingChatBot({
         name,
         inputValue,
         contextFilePath,
-        OPENROUTER_API_KEY,
         model,
         endpointUrl,
         bearerToken,

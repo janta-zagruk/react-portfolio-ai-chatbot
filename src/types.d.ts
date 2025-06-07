@@ -1,6 +1,5 @@
 export type FloatingChatBotProps = {
   name: string;
-  secret_key: string;
   context_file: string;
   model: string;
   endpointUrl: string;

@@ -14,7 +14,6 @@ function App() {
       <FloatingChatBot
         name={"Ian Hansson"}
         theme={"light"}
-        secret_key={import.meta.env.VITE_OPENROUTER_API_KEY}
         context_file={resumePdf}
         endpointUrl={"https://api.openrouter.ai"}
         model={"google/gemini-flash-1.5-8b"}
