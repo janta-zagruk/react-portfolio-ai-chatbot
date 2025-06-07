@@ -35,7 +35,7 @@ function App() {
   return (
     <FloatingChatBot
       name="Ian Hansson"
-      secret_key={import.meta.env.VITE_OPENROUTER_API_KEY}
+      endpointUrl="http://localhost:3001/api/chat"
       context_file={"/resume.pdf"}
       model="google/gemini-flash-1.5-8b"
       chatbotName="Career Assistant"
@@ -46,12 +46,14 @@ function App() {
 export default App;
 ```
 
-## Usage in Next.js (with Dynamic Import)
+## Usage in Next.js
 
 To avoid SSR issues, use next/dynamic to dynamically import the chatbot component with SSR disabled:
 
+### App Router (Next.js 13+)
+
 ```js
-// pages/index.tsx or any client-side page
+// app/page.tsx or any client-side component
 'use client'
 import dynamic from "next/dynamic";
 
@@ -61,24 +63,59 @@ const FloatingChatBot = dynamic(() => import("react-portfolio-ai-chatbot"), {
 
 export default function Home() {
   return (
-    <FloatingChatBot
-      name="Ian Hansson"
-      secret_key={process.env.NEXT_PUBLIC_OPENROUTER_API_KEY!}
-      context_file={"/resume.pdf"}
-      model="google/gemini-flash-1.5-8b"
-      chatbotName="Career Assistant"
-      initialGreeting="Hi! I'm Ian's AI assistant. Ask me anything about their resume!"
-      position="right"
-      theme="light"
-      autoOpen={false}
-    />
+    <div>
+      <h1>My Portfolio</h1>
+      <FloatingChatBot
+        name="Ian Hansson"
+        endpointUrl="/api/chat"
+        context_file={"/resume.pdf"}
+        model="google/gemini-flash-1.5-8b"
+        chatbotName="Career Assistant"
+        initialGreeting="Hi! I'm Ian's AI assistant. Ask me anything about their resume!"
+        position="right"
+        theme="light"
+        autoOpen={false}
+      />
+    </div>
+  );
+}
+```
+
+### Pages Router (Next.js 12 and below)
+
+```js
+// pages/index.tsx or any client-side page
+import dynamic from "next/dynamic";
+
+const FloatingChatBot = dynamic(() => import("react-portfolio-ai-chatbot"), {
+  ssr: false,
+});
+
+export default function Home() {
+  return (
+    <div>
+      <h1>My Portfolio</h1>
+      <FloatingChatBot
+        name="Ian Hansson"
+        endpointUrl="/api/chat"
+        context_file={"/resume.pdf"}
+        model="google/gemini-flash-1.5-8b"
+        chatbotName="Career Assistant"
+        initialGreeting="Hi! I'm Ian's AI assistant. Ask me anything about their resume!"
+        position="right"
+        theme="light"
+        autoOpen={false}
+      />
+    </div>
   );
 }
 ```
 
 ## Setting Up a Backend Proxy
 
-To securely use your OpenRouter API key, we recommend setting up a lightweight backend server that acts as a proxy between your chatbot and the OpenRouter API. This keeps your key safe from exposure in the frontend.
+To securely use your OpenRouter API key, you **must** set up a backend server that acts as a proxy between your chatbot and the OpenRouter API. This keeps your key safe from exposure in the frontend.
+
+### Express.js Backend Server
 
 **1. Install Required Packages**
 
@@ -88,18 +125,16 @@ Set up a basic Express server:
 npm install express cors dotenv axios
 ```
 
-**2. Create an <code>.env</code> File**
-
-Set up a basic Express server:
+**2. Create an `.env` File**
 
 ```bash
 OPENROUTER_API_KEY=sk-xxxxxxx
 PORT=3001
 ```
 
-**3. Create a Backend File (<code>server.js</code>)**
+**3. Create a Backend File (`server.js`)**
 
-Here’s an example route that handles POST requests to OpenRouter’s chat completion endpoint:
+Here's an example route that handles POST requests to OpenRouter's chat completion endpoint:
 
 ```js
 const express = require("express");
@@ -142,10 +177,117 @@ app.listen(process.env.PORT || 3001, () =>
 );
 ```
 
-**4. Use the Proxy Endpoint in Your Frontend**
+### Next.js Backend Proxy Setup
 
-In your React or Next.js app, use the endpointUrl prop instead of passing the secret_key directly:
+For Next.js applications, you can create API routes directly within your Next.js app instead of running a separate Express server.
 
+#### App Router (Next.js 13+)
+
+Create `app/api/chat/route.ts`:
+
+```typescript
+// app/api/chat/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(request: NextRequest) {
+  try {
+    const { messages, model, temperature = 0.7 } = await request.json();
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenRouter API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Chat API error:', error);
+    return NextResponse.json(
+      { error: 'Failed to connect to OpenRouter' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+**Environment Variables (`.env.local`):**
+
+```bash
+OPENROUTER_API_KEY=sk-xxxxxxx
+NEXT_PUBLIC_SITE_URL=https://your-portfolio-domain.com
+```
+
+#### Pages Router (Next.js 12 and below)
+
+Create `pages/api/chat.ts`:
+
+```typescript
+// pages/api/chat.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const { messages, model, temperature = 0.7 } = req.body;
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenRouter API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Chat API error:', error);
+    res.status(500).json({ error: 'Failed to connect to OpenRouter' });
+  }
+}
+```
+
+**Environment Variables (`.env.local`):**
+
+```bash
+OPENROUTER_API_KEY=sk-xxxxxxx
+NEXT_PUBLIC_SITE_URL=https://your-portfolio-domain.com
+```
+
+### Usage with Backend Proxy
+
+Once you have your backend proxy set up, use the `endpointUrl` prop in your frontend:
+
+**For Express.js server:**
 ```js
 <FloatingChatBot
   name="Ian Hansson"
@@ -156,7 +298,18 @@ In your React or Next.js app, use the endpointUrl prop instead of passing the se
 />
 ```
 
-**5. (Optional) Add Authentication**
+**For Next.js API routes:**
+```js
+<FloatingChatBot
+  name="Ian Hansson"
+  endpointUrl="/api/chat"
+  context_file="/resume.pdf"
+  model="google/gemini-flash-1.5-8b"
+  chatbotName="Career Assistant"
+/>
+```
+
+### (Optional) Add Authentication
 
 You can protect your backend route using a bearer token.
 
@@ -165,14 +318,14 @@ You can protect your backend route using a bearer token.
 ```js
 <FloatingChatBot
   name="Ian Hansson"
-  endpointUrl="http://localhost:3001/api/chat"
-  bearerToken="your_token"
+  endpointUrl="/api/chat"
+  bearerToken="your_secure_token"
   context_file="/resume.pdf"
   model="google/gemini-flash-1.5-8b"
 />
 ```
 
-**In the backend**, verify it:
+**In the Express.js backend**, verify it:
 
 ```js
 app.post("/api/chat", async (req, res) => {
@@ -185,10 +338,41 @@ app.post("/api/chat", async (req, res) => {
 });
 ```
 
-Add this to your <code>.env</code>
+**In Next.js App Router**, verify it:
+
+```typescript
+// app/api/chat/route.ts
+export async function POST(request: NextRequest) {
+  const authHeader = request.headers.get('authorization');
+  const token = authHeader?.split(' ')[1];
+  
+  if (token !== process.env.EXPECTED_TOKEN) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // ...the rest of your code here
+}
+```
+
+**In Next.js Pages Router**, verify it:
+
+```typescript
+// pages/api/chat.ts
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (token !== process.env.EXPECTED_TOKEN) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // ...the rest of your code here
+}
+```
+
+Add this to your environment variables:
 
 ```bash
-EXPECTED_TOKEN=your_token
+EXPECTED_TOKEN=your_secure_token
 ```
 
 ## Props
@@ -212,9 +396,9 @@ EXPECTED_TOKEN=your_token
       <td><strong>Yes</strong></td>
     </tr>
     <tr>
-      <td><code>secret_key</code></td>
+      <td><code>endpointUrl</code></td>
       <td><code>string</code></td>
-      <td>OpenRouter API key</td>
+      <td>Backend server endpoint that proxies requests to the OpenRouter API</td>
       <td>–</td>
       <td><strong>Yes</strong></td>
     </tr>
@@ -229,13 +413,6 @@ EXPECTED_TOKEN=your_token
       <td><code>model</code></td>
       <td><code>string</code></td>
       <td>Model name to use from OpenRouter</td>
-      <td>–</td>
-      <td><strong>Yes</strong></td>
-    </tr>
-    <tr>
-      <td><code>endpointUrl</code></td>
-      <td><code>string</code></td>
-      <td>Backend server endpoint that proxies requests to the OpenRouter API</td>
       <td>–</td>
       <td><strong>Yes</strong></td>
     </tr>
@@ -373,7 +550,16 @@ EXPECTED_TOKEN=your_token
 1. Visit https://openrouter.ai
 2. Sign up with your email or GitHub
 3. Go to API Keys from your dashboard
-4. Create a new API key and use it in the <code>secret_key</code> prop
+4. Create a new API key and use it in your backend server environment variables
+
+## Security Best Practices
+
+- **Never expose your OpenRouter API key in frontend code**
+- Always use the `endpointUrl` prop to point to your secure backend
+- Consider implementing rate limiting on your backend endpoints
+- Use HTTPS in production
+- Validate and sanitize user inputs on the backend
+- Consider implementing CORS policies appropriate for your domain
 
 ## Credits & Legal
 
