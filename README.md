@@ -111,7 +111,7 @@ export default function Home() {
 }
 ```
 
-## Setting Up a Backend Proxy
+## Setting Up a Backend Proxy For the "endpointurl" prop
 
 To securely use your OpenRouter API key, you **must** set up a backend server that acts as a proxy between your chatbot and the OpenRouter API. This keeps your key safe from exposure in the frontend.
 
