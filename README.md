@@ -2,7 +2,8 @@
 
 A **customizable floating chatbot UI component** for React portfolio websites that transforms your resume into an interactive AI assistant.
 
-[Demo URL](https://demo-react-portfolio-ai-chatbot.vercel.app)
+[Demo URL](https://demo-react-portfolio-ai-chatbot.vercel.app) 
+
 [Demo Source Code](https://github.com/janta-zagruk/demo-react-portfolio-ai-chatbot)
 
 ## 📋 Prerequisites
