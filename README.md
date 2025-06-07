@@ -743,21 +743,5 @@ MIT © Md Sohail and Soumyadip Ghosh
 
 ---
 
-## 📞 Support
-
-Need help? Here are your options:
-
-1. **Check this documentation** first
-2. **Search existing GitHub issues**
-3. **Create a new issue** with detailed information
-4. **Join our Discord community** (if applicable)
-
-**When reporting issues, please include:**
-- Your React/Next.js version
-- Browser and version
-- Error messages from console
-- Minimal reproduction example
-
----
 
 *Built with ❤️ for the developer community*
